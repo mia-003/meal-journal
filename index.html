@@ -12,13 +12,18 @@
     @media(max-width:850px){.app{padding:20px 16px 40px}.top{align-items:flex-start}.privacy{display:none}.nav{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:5;box-shadow:0 8px 30px #34302726;background:#eee8deeF;backdrop-filter:blur(10px)}.stats{grid-template-columns:1fr 1fr}.layout{display:flex;flex-direction:column}.layout>aside{order:-1}.habit-grid{grid-template-columns:1fr}.hero h2{font-size:28px}.hero{align-items:flex-start}.date-pill{display:none}.footer{padding-bottom:55px}}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .cloud-card{margin-bottom:14px;display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.8fr);gap:22px;align-items:center;background:linear-gradient(145deg,#fffdf8,#edf5ef);border-color:#d8e6dc}
+    .cloud-kicker{display:inline-block;color:var(--green);font-size:11px;font-weight:750;letter-spacing:.04em;text-transform:uppercase;margin-bottom:7px}.cloud-copy h3{margin:0 0 7px;font-size:17px}.cloud-copy p{margin:0;color:var(--muted);font-size:12px;line-height:1.65}.cloud-actions{display:grid;gap:8px}.email-login{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.email-login input{width:100%;border:1px solid var(--line);background:white;color:var(--ink);border-radius:11px;padding:11px 12px;outline:none}.email-login input:focus{border-color:#7da28d;box-shadow:0 0 0 3px #315c4b14}.email-login button,.cloud-primary{border:0;background:var(--green);color:white;border-radius:11px;padding:11px 14px;font-size:12px;font-weight:700}.cloud-primary{width:100%}.cloud-actions button:disabled{opacity:.6;cursor:wait}.sync-progress{min-height:16px;font-size:11px;line-height:1.45;color:var(--muted)}
+    @media(max-width:850px){.cloud-card{grid-template-columns:1fr}.email-login{grid-template-columns:1fr}.cloud-actions button{min-height:42px}}
+  </style>
 </head>
 <body>
 <main class="app">
   <header class="top">
     <div class="brand"><div class="mark">🥢</div><div><h1>Mia's Eating Life</h1><p>Recording📝 & Accompanying🫂</p></div></div>
     <nav class="nav"><button class="active" data-view="dashboard">今日</button><button data-view="records">记录</button><button data-view="habits">习惯</button></nav>
-    <div class="privacy">◉ 数据仅保存在本浏览器</div>
+    <div class="privacy" id="storageStatus">◉ 本机保存 · 登录后可云同步</div>
   </header>
 
   <section class="view active" id="dashboard">
@@ -55,6 +60,23 @@
 
   <section class="view" id="records">
     <div class="hero"><div><h2>回溯吃饭记录</h2><p>按时间回看文字、照片和热量估算。</p></div><button class="date-pill" id="exportBtn">导出数据 JSON</button></div>
+    <section class="card cloud-card">
+      <div class="cloud-copy">
+        <span class="cloud-kicker">☁ 云端同步</span>
+        <h3 id="cloudTitle">登录后可在不同设备查看记录</h3>
+        <p id="cloudMessage">使用同一个邮箱登录，即可把本机已有记录安全复制到 Supabase。迁移成功后，本机副本仍会保留。</p>
+      </div>
+      <div class="cloud-actions">
+        <div class="email-login" id="emailLogin">
+          <input id="emailInput" type="email" autocomplete="email" inputmode="email" placeholder="输入你的邮箱">
+          <button id="sendLoginLink" type="button">发送登录链接</button>
+        </div>
+        <button class="cloud-primary" id="syncLocalData" type="button" hidden>同步本机记录到云端</button>
+        <button class="ghost" id="refreshCloud" type="button" hidden>刷新云端记录</button>
+        <button class="ghost" id="signOut" type="button" hidden>退出登录</button>
+        <div class="sync-progress" id="syncProgress" aria-live="polite"></div>
+      </div>
+    </section>
     <section class="card"><div class="card-head"><h3>全部饮食记录</h3><span id="recordTotal"></span></div><div id="allRecords"></div></section>
   </section>
 
@@ -106,4 +128,5 @@ $('#saveMeal').onclick=()=>{const text=$('#mealText').value.trim(),time=$('#meal
 document.addEventListener('click',e=>{const id=e.target.dataset.delete;if(id&&confirm('删除这条饮食记录？')){records=records.filter(r=>r.id!==id);save();render();toast('记录已删除')}});$('#demoBtn').onclick=addDemo;$('#exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(records,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Food Record-'+localDate()+'.json';a.click();URL.revokeObjectURL(a.href)};
 const now=new Date();$('#todayDate').textContent=now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日 · 周'+dayName(now);setNow();load();render();updateEstimate();
 </script>
+<script src="cloud-sync.js"></script>
 </body></html>
