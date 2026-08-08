@@ -1,4 +1,4 @@
-# Mia's Eating Life（食光记）
+# Mia's Eating Life
 
 [中文](README.md) | [English](README.en.md)
 
